@@ -1,5 +1,20 @@
 import time
 
+# Sample input 
+# target = "The quick brown fox jumps over the lazy dog."
+# typed  = "The quikc brown fox jumps over the lazy dg."
+
+# Algorithm sketch:
+# 1. Store the target passage as a string
+# 2. Record start time
+# 3. Display passage, wait for user to type
+# 4. Record end time → elapsed = end - start
+# 5. Zip target + typed → count matching characters
+# 6. correct / max(len(target), len(typed)) → accuracy %
+# 7. word count / (elapsed / 60) → WPM
+# 8. Print results
+
+
 def calculate_wpm(typed: str, elapsed_seconds: float) -> float:
     """Calculate words per minute."""
     word_count = len(typed.split())
