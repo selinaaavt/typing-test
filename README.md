@@ -84,7 +84,7 @@ python typing_test.py
 ```
 project-folder/
 │
-├── typing_test.py
+├── typingtest.py
 ├── leaderboard.json (created automatically after first score)
 └── README.md
 ```
