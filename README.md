@@ -103,19 +103,10 @@ project-folder/
 ### Generative AI — Claude (Anthropic)
 We used Claude as an AI assistant during the final polish stage of this project. Here is a detailed description of how we used it and what it contributed:
 
-**What we asked it to do:**
-After receiving feedback on our FP Design, we described three specific issues to Claude and asked it to fix them:
-1. The accuracy function used `max(len(target), len(typed))` as the denominator, which unfairly penalized users who typed extra characters
-2. The y/n prompts in the main loop had no input validation — unexpected input was silently ignored
-3. The leaderboard sorted by WPM first, which let fast-but-inaccurate scores rank above slower, more accurate ones
-
-**What Claude wrote:**
-- Rewrote `calculate_accuracy` to divide by `len(target)` instead of the longer string length
-- Added a new `ask_yes_no` helper function that loops until it receives valid input
-- Changed the leaderboard sort key from `(-wpm, -accuracy)` to `-(wpm * accuracy / 100)`
+We used Claude to help clean up our code comments for the final submission. Our original comments explained almost every line, including ones that were self-explanatory. We asked Claude to trim them down so only important or non-obvious lines were commented, following the project rubric's guidance. Claude did not change any logic — it only removed redundant comments and kept the ones that explained the *why* behind tricky lines (e.g. why we divide by `len(target)`, why we multiply WPM by accuracy for ranking).
 
 **What we wrote:**
-All original program logic, structure, comments, and design were written by us. Claude's contributions were limited to the three fixes above, which we reviewed, understood, and kept our original comments alongside.
+All original program logic, structure, and design were written by us. Claude's contributions were limited to the three bug fixes and comment cleanup described above, all of which we reviewed and understood.
 
 ---
 
