@@ -28,18 +28,18 @@ def calculate_accuracy(target: str, typed: str) -> float:
     # make a varible for correct characters user typed in comparison with target text
     correct_chars = 0
     
-    # whichever string (target text or typed text) is bigger is logged as the total number of characters used for calculations
-    total_chars = max(len(target), len(typed))
-
-    # loop check for each characters
-    for i in range(total_chars):
+    # FIX: only compare up to the length of the TARGET, not the longer string.
+    # this way, extra characters the user types beyond the passage don't count
+    # against them, and stopping early is penalized fairly (missing chars = wrong).
+    # we still divide by len(target) so the denominator is always consistent.
+    for i in range(len(target)):
         # A character is only correct if it exists at the exact same index in both strings
-        if i < len(target) and i < len(typed) and target[i] == typed[i]:
+        if i < len(typed) and target[i] == typed[i]:
             correct_chars += 1
 
     # reach the accuracy by dividing correct characters by total characters and converting to percent by multiplying by 100
     # round to nearest whole number 
-    return round((correct_chars / total_chars) * 100, 1)
+    return round((correct_chars / len(target)) * 100, 1)
 
 # set file to the one named leaderboard.json
 LEADERBOARD_FILE = "leaderboard.json"
@@ -89,17 +89,35 @@ def display_leaderboard():
         print("\nNo scores yet.\n")
         return
 
-    # sort scores by wpm and accuracy
-    scores.sort(key=lambda x: (-x["wpm"], -x["accuracy"]))
+    # FIX: sort by a combined score (WPM * accuracy%) instead of WPM alone.
+    # this prevents a very fast but inaccurate run from beating a slower, more accurate one.
+    # for example:
+    #   - 100 WPM at 50% accuracy  -> combined score = 50
+    #   - 70  WPM at 95% accuracy  -> combined score = 66.5  (ranks higher)
+    scores.sort(key=lambda x: -(x["wpm"] * (x["accuracy"] / 100)))
 
     # show a header with the title Leaderboard
-    print("\n--- Leaderboard ---")
+    print("\n--- Leaderboard (ranked by WPM x accuracy) ---")
     
     # print up to 10 scores in the format (name, wpm, accuracy)
     for i, score in enumerate(scores[:10], start=1):
         print(f"{i}. {score['name']} - {score['wpm']} WPM, {score['accuracy']}%")
     print()
 
+# FIX: new helper that keeps re-asking until it gets a valid y/n answer.
+# strips surrounding whitespace and lowercases so "Y", " y ", "N " all work.
+def ask_yes_no(prompt: str) -> bool:
+    while True:
+        # ask the question and clean up the input
+        answer = input(prompt).strip().lower()
+        # if yes return true
+        if answer in ("y", "yes"):
+            return True
+        # if no return false
+        if answer in ("n", "no"):
+            return False
+        # if anything else re-prompt the user
+        print("Please enter 'y' or 'n'.")
 
 # input the passgaes to the running test algorithm
 def run_typing_test(passages):
@@ -139,6 +157,7 @@ def run_typing_test(passages):
     print(f"WPM:      {wpm}")
     print(f"Accuracy: {accuracy}%\n")
 
+    # FIX: strip whitespace from the name and handle a blank entry gracefully
     # ask for name and save to variable
     name = input("Enter your name for the leaderboard (leave blank to skip): ").strip()
     
@@ -162,21 +181,18 @@ def main():
     while True:
         run_typing_test(passages)
 
-        # ask if user wants to see leaderboard by a input of y/n 
-        choice = input("View leaderboard? (y/n): ").strip().lower()
+        # FIX: use ask_yes_no so unexpected input doesn't silently do the wrong thing
+        # ask if user wants to see leaderboard by a input of y/n
         # if yes then display leaderboard
-        if choice == "y":
+        if ask_yes_no("View leaderboard? (y/n): "):
             display_leaderboard()
 
         # ask if user wants to try again by input of y/n
-        retry = input("Do you want to try again? (y/n): ").strip().lower()
         # if not yes then end the typing test
-        if retry != "y":
+        if not ask_yes_no("Do you want to try again? (y/n): "):
             print("Thanks for playing! Goodbye.")
             break
 
 
 if __name__ == "__main__":
     main()
-
-    
